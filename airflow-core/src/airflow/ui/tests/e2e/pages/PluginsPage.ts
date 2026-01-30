@@ -31,6 +31,9 @@ export class PluginsPage extends BasePage {
   public readonly rows: Locator;
   public readonly table: Locator;
 
+  private currentLimit?: number;
+  private currentOffset?: number;
+
   public constructor(page: Page) {
     super(page);
 
@@ -90,8 +93,46 @@ export class PluginsPage extends BasePage {
    * Navigate to Plugins page with specific pagination parameters
    */
   public async navigateWithParams(limit: number, offset: number): Promise<void> {
-    await this.navigateTo(`/plugins?limit=${limit}&offset=${offset}`);
+    this.currentLimit = limit;
+    this.currentOffset = offset;
+
+    await this.page.goto(`/plugins?limit=${limit}&offset=${offset}`, {
+      timeout: 30_000,
+      waitUntil: "domcontentloaded",
+    });
     await this.waitForLoad();
+    await this.ensureUrlParams();
+  }
+
+  /**
+   * Check if the next page button is available and enabled
+   */
+  public async hasNextPage(): Promise<boolean> {
+    const count = await this.paginationNextButton.count();
+
+    if (count === 0) {
+      return false;
+    }
+
+    return await this.paginationNextButton.isEnabled();
+  }
+
+  /**
+   * Click the next page button
+   */
+  public async clickNextPage(): Promise<void> {
+    await this.paginationNextButton.click();
+    await this.waitForLoad();
+    await this.ensureUrlParams();
+  }
+
+  /**
+   * Click the previous page button
+   */
+  public async clickPrevPage(): Promise<void> {
+    await this.paginationPrevButton.click();
+    await this.waitForLoad();
+    await this.ensureUrlParams();
   }
 
   /**
@@ -123,5 +164,37 @@ export class PluginsPage extends BasePage {
       undefined,
       { timeout: 30_000 },
     );
+  }
+
+  /**
+   * Ensure offset and limit params are present in URL to prevent them from being ignored
+   * This is similar to EventsPage.ensureUrlParams()
+   */
+  private async ensureUrlParams(): Promise<void> {
+    if (this.currentLimit === undefined || this.currentOffset === undefined) {
+      return;
+    }
+
+    const currentUrl = this.page.url();
+    const url = new URL(currentUrl);
+    const hasLimit = url.searchParams.has("limit");
+    const hasOffset = url.searchParams.has("offset");
+
+    if (hasLimit && !hasOffset) {
+      url.searchParams.set("offset", String(this.currentOffset));
+      await this.page.goto(url.toString(), {
+        timeout: 30_000,
+        waitUntil: "domcontentloaded",
+      });
+      await this.waitForLoad();
+    } else if (!hasLimit && !hasOffset) {
+      url.searchParams.set("offset", String(this.currentOffset));
+      url.searchParams.set("limit", String(this.currentLimit));
+      await this.page.goto(url.toString(), {
+        timeout: 30_000,
+        waitUntil: "domcontentloaded",
+      });
+      await this.waitForLoad();
+    }
   }
 }

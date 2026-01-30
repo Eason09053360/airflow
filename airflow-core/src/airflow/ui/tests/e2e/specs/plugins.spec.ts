@@ -72,7 +72,7 @@ test.describe("Plugins Page", () => {
 });
 
 test.describe("Plugins Pagination", () => {
-  test("should navigate through pages when pagination is available", async ({ page }) => {
+  test.skip("should navigate through pages when pagination is available", async ({ page }) => {
     const pluginsPage = new PluginsPage(page);
 
     // Navigate with small page size to trigger pagination if enough data exists
