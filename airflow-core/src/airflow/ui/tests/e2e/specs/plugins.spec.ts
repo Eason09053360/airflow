@@ -71,16 +71,33 @@ test.describe("Plugins Page", () => {
   });
 });
 
-test.describe("Plugins Pagination", () => {
-  test.skip("should navigate through pages when pagination is available", async ({ page }) => {
+test.describe.skip("Plugins Pagination", () => {
+  test("should navigate through pages when pagination is available", async ({ page }) => {
     const pluginsPage = new PluginsPage(page);
 
     // Navigate with small page size to trigger pagination if enough data exists
     await pluginsPage.navigateWithParams(5, 0);
     await pluginsPage.waitForLoad();
 
+    // Debug: Log current URL to verify parameters
+    const currentUrl = page.url();
+    console.log('Current URL:', currentUrl);
+
+    // Debug: Log actual number of plugins displayed
+    const actualCount = await pluginsPage.getPluginCount();
+    console.log('Expected limit: 5, Actual plugins displayed:', actualCount);
+
+    // Debug: Log plugin names to see what's being shown
+    const pluginNames = await pluginsPage.getPluginNames();
+    console.log('Plugin names:', pluginNames);
+
     const nextButton = pluginsPage.paginationNextButton;
     const prevButton = pluginsPage.paginationPrevButton;
+
+    // Debug: Check if pagination buttons exist
+    const nextButtonCount = await nextButton.count();
+    const prevButtonCount = await prevButton.count();
+    console.log('Next button count:', nextButtonCount, 'Prev button count:', prevButtonCount);
 
     // Pagination controls must be visible - fail explicitly if not available
     await expect(nextButton).toBeVisible({
