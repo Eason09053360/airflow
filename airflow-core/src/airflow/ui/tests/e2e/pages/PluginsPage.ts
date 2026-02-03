@@ -50,6 +50,24 @@ export class PluginsPage extends BasePage {
   }
 
   /**
+   * Click the next page button
+   */
+  public async clickNextPage(): Promise<void> {
+    await this.paginationNextButton.click();
+    await this.waitForLoad();
+    await this.ensureUrlParams();
+  }
+
+  /**
+   * Click the previous page button
+   */
+  public async clickPrevPage(): Promise<void> {
+    await this.paginationPrevButton.click();
+    await this.waitForLoad();
+    await this.ensureUrlParams();
+  }
+
+  /**
    * Get the count of plugin rows
    */
   public async getPluginCount(): Promise<number> {
@@ -83,6 +101,19 @@ export class PluginsPage extends BasePage {
   }
 
   /**
+   * Check if the next page button is available and enabled
+   */
+  public async hasNextPage(): Promise<boolean> {
+    const count = await this.paginationNextButton.count();
+
+    if (count === 0) {
+      return false;
+    }
+
+    return await this.paginationNextButton.isEnabled();
+  }
+
+  /**
    * Navigate to Plugins page
    */
   public async navigate(): Promise<void> {
@@ -100,37 +131,6 @@ export class PluginsPage extends BasePage {
       timeout: 30_000,
       waitUntil: "domcontentloaded",
     });
-    await this.waitForLoad();
-    await this.ensureUrlParams();
-  }
-
-  /**
-   * Check if the next page button is available and enabled
-   */
-  public async hasNextPage(): Promise<boolean> {
-    const count = await this.paginationNextButton.count();
-
-    if (count === 0) {
-      return false;
-    }
-
-    return await this.paginationNextButton.isEnabled();
-  }
-
-  /**
-   * Click the next page button
-   */
-  public async clickNextPage(): Promise<void> {
-    await this.paginationNextButton.click();
-    await this.waitForLoad();
-    await this.ensureUrlParams();
-  }
-
-  /**
-   * Click the previous page button
-   */
-  public async clickPrevPage(): Promise<void> {
-    await this.paginationPrevButton.click();
     await this.waitForLoad();
     await this.ensureUrlParams();
   }

@@ -72,52 +72,33 @@ test.describe("Plugins Page", () => {
 });
 
 test.describe.skip("Plugins Pagination", () => {
-  test("should navigate through pages when pagination is available", async ({ page }) => {
-    const pluginsPage = new PluginsPage(page);
+  let pluginsPage: PluginsPage;
 
-    // Navigate with small page size to trigger pagination if enough data exists
-    await pluginsPage.navigateWithParams(5, 0);
-    await pluginsPage.waitForLoad();
+  test.beforeEach(({ page }) => {
+    pluginsPage = new PluginsPage(page);
+  });
 
-    // Debug: Log current URL to verify parameters
-    const currentUrl = page.url();
-    console.log('Current URL:', currentUrl);
+  test("should navigate through pages using next and prev buttons", async () => {
+    await pluginsPage.navigate();
 
-    // Debug: Log actual number of plugins displayed
-    const actualCount = await pluginsPage.getPluginCount();
-    console.log('Expected limit: 5, Actual plugins displayed:', actualCount);
+    await expect(pluginsPage.paginationNextButton).toBeVisible();
+    await expect(pluginsPage.paginationPrevButton).toBeVisible();
 
-    // Debug: Log plugin names to see what's being shown
-    const pluginNames = await pluginsPage.getPluginNames();
-    console.log('Plugin names:', pluginNames);
+    const initialPluginNames = await pluginsPage.getPluginNames();
 
-    const nextButton = pluginsPage.paginationNextButton;
-    const prevButton = pluginsPage.paginationPrevButton;
+    expect(initialPluginNames.length).toBeGreaterThan(0);
 
-    // Debug: Check if pagination buttons exist
-    const nextButtonCount = await nextButton.count();
-    const prevButtonCount = await prevButton.count();
-    console.log('Next button count:', nextButtonCount, 'Prev button count:', prevButtonCount);
+    await pluginsPage.clickNextPage();
 
-    // Pagination controls must be visible - fail explicitly if not available
-    await expect(nextButton).toBeVisible({
-      timeout: 5000,
-    });
-    await expect(prevButton).toBeVisible();
+    const pluginNamesAfterNext = await pluginsPage.getPluginNames();
 
-    // Test pagination flow
-    const firstPagePlugins = await pluginsPage.getPluginNames();
+    expect(pluginNamesAfterNext.length).toBeGreaterThan(0);
+    expect(pluginNamesAfterNext).not.toEqual(initialPluginNames);
 
-    await nextButton.click();
-    await pluginsPage.waitForTableData();
+    await pluginsPage.clickPrevPage();
 
-    const secondPagePlugins = await pluginsPage.getPluginNames();
-    expect(secondPagePlugins).not.toEqual(firstPagePlugins);
+    const pluginNamesAfterPrev = await pluginsPage.getPluginNames();
 
-    await prevButton.click();
-    await pluginsPage.waitForTableData();
-
-    const backToFirstPage = await pluginsPage.getPluginNames();
-    expect(backToFirstPage).toEqual(firstPagePlugins);
+    expect(pluginNamesAfterPrev).toEqual(initialPluginNames);
   });
 });
