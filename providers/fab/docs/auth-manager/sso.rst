@@ -206,21 +206,14 @@ Provider Examples
 
 **Azure AD with Group-Based Authorization**
 
-By default, Azure OAuth retrieves user roles from the ``roles`` claim in the ID token.
-However, if your organization uses Azure AD groups instead of app roles for access control,
-you can configure Airflow to read group memberships from the ``groups`` claim.
-
-Add the following to your ``webserver_config.py``:
-
 .. code-block:: python
 
    from flask_appbuilder.security.manager import AUTH_OAUTH
 
    AUTH_TYPE = AUTH_OAUTH
 
-   # Configure Azure to use 'groups' claim instead of 'roles'
    AUTH_OAUTH_ROLE_KEYS = {
-       "azure": "groups",  # Use 'groups' claim from Azure AD token
+       "azure": "groups",
    }
 
    OAUTH_PROVIDERS = [
@@ -233,7 +226,7 @@ Add the following to your ``webserver_config.py``:
                "client_secret": "your-client-secret",
                "api_base_url": "https://login.microsoftonline.com/<tenant-id>/v2.0",
                "client_kwargs": {
-                   "scope": "openid email profile groups",  # Include 'groups' scope
+                   "scope": "openid email profile groups",
                    "resource": "your-client-id",
                    "verify_signature": True,
                },
@@ -244,7 +237,6 @@ Add the following to your ``webserver_config.py``:
        }
    ]
 
-   # Map Azure AD group names to Airflow roles
    AUTH_ROLES_MAPPING = {
        "airflow-admin-group": ["Admin"],
        "airflow-op-group": ["Op"],
@@ -252,10 +244,8 @@ Add the following to your ``webserver_config.py``:
        "airflow-viewer-group": ["Viewer"],
    }
 
-   # Automatically sync roles from OAuth groups at login
    AUTH_ROLES_SYNC_AT_LOGIN = True
 
-   # Allow automatic user registration on first login
    AUTH_USER_REGISTRATION = True
    AUTH_USER_REGISTRATION_ROLE = "Viewer"
 

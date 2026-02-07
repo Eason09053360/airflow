@@ -261,36 +261,34 @@ class TestFabAirflowSecurityManagerOverride:
         sm._decode_and_validate_azure_jwt = Mock(return_value=resp)
         sm._get_authentik_token_info = Mock(return_value=resp)
         assert sm.get_oauth_user_info(provider, {"id_token": None}) == user_info
-    @mock.patch("airflow.providers.fab.auth_manager.security_manager.override.current_app")
-    def test_get_oauth_user_info_azure_with_groups_config(self, mock_current_app):
-        """Test Azure OAuth with AUTH_OAUTH_ROLE_KEYS configured to use 'groups' instead of 'roles'."""
-        sm = EmptySecurityManager()
-        sm.appbuilder = Mock(sm=sm)
-        sm.oauth_remotes = {}
-        
-        # Configure to use 'groups' field for Azure
-        mock_current_app.config.get.return_value = {"azure": "groups"}
-        
-        # Mock Azure JWT response with groups but no roles
-        azure_jwt_data = {
-            "oid": "test-user-id",
-            "given_name": "Jane",
-            "family_name": "Smith",
-            "email": "jane.smith@example.com",
-            "groups": ["admin-group", "viewer-group"],
-        }
-        sm._decode_and_validate_azure_jwt = Mock(return_value=azure_jwt_data)
-        
-        result = sm.get_oauth_user_info("azure", {"id_token": "fake-token"})
-        
-        # Verify that role_keys contains the groups
-        assert result == {
-            "username": "test-user-id",
-            "first_name": "Jane",
-            "last_name": "Smith",
-            "email": "jane.smith@example.com",
-            "role_keys": ["admin-group", "viewer-group"],
-        }
-        
-        # Verify config was checked
-        mock_current_app.config.get.assert_called_once_with("AUTH_OAUTH_ROLE_KEYS", {})
+
+    def test_get_oauth_user_info_azure_with_groups_config(self):
+        from flask import Flask
+
+        app = Flask(__name__)
+        app.config["AUTH_OAUTH_ROLE_KEYS"] = {"azure": "groups"}
+
+        with app.app_context():
+            sm = EmptySecurityManager()
+            sm.appbuilder = Mock(sm=sm)
+            sm.oauth_remotes = {}
+
+            azure_jwt_data = {
+                "oid": "test-user-id",
+                "given_name": "Jane",
+                "family_name": "Smith",
+                "email": "jane.smith@example.com",
+                "groups": ["admin-group", "viewer-group"],
+            }
+            sm._decode_and_validate_azure_jwt = Mock(return_value=azure_jwt_data)
+
+            result = sm.get_oauth_user_info("azure", {"id_token": "fake-token"})
+
+            # Verify that role_keys contains the groups
+            assert result == {
+                "username": "test-user-id",
+                "first_name": "Jane",
+                "last_name": "Smith",
+                "email": "jane.smith@example.com",
+                "role_keys": ["admin-group", "viewer-group"],
+            }
