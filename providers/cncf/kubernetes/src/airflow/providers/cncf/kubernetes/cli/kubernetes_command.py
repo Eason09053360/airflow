@@ -73,8 +73,10 @@ def generate_pod_yaml(args):
         if AIRFLOW_V_3_0_PLUS:
             from uuid6 import uuid7
 
-            ti = TaskInstance(task, run_id=dr.run_id)
-            ti.dag_version_id = uuid7()
+            from airflow.serialization.serialized_objects import create_scheduler_operator
+
+            serialized_task = create_scheduler_operator(task)
+            ti = TaskInstance(serialized_task, run_id=dr.run_id, dag_version_id=uuid7())
         else:
             ti = TaskInstance(task, run_id=dr.run_id)
         ti.dag_run = dr
