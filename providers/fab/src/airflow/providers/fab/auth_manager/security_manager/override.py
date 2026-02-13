@@ -2145,10 +2145,7 @@ class FabAirflowSecurityManagerOverride(AirflowSecurityManagerV2):
             me = self._decode_and_validate_azure_jwt(resp["id_token"])
             log.debug("User info from Azure: %s", me)
             # https://learn.microsoft.com/en-us/azure/active-directory/develop/id-token-claims-reference#payload-claims
-            if has_app_context():
-                role_key = current_app.config.get("AUTH_OAUTH_ROLE_KEYS", {}).get("azure", "roles")
-            else:
-                role_key = "roles"
+            role_key = current_app.config.get("AUTH_OAUTH_ROLE_KEYS", {}).get("azure", "roles")
             return {
                 "email": me["email"] if "email" in me else me["upn"],
                 "first_name": me.get("given_name", ""),
