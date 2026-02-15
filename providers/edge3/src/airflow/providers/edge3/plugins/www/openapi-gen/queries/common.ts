@@ -1,9 +1,9 @@
 // generated with @7nohe/openapi-react-query-codegen@1.6.2 
 
 import { UseQueryResult } from "@tanstack/react-query";
-import { JobsService, LogsService, MonitorService, UiService, WorkerService } from "../requests/services.gen";
-import { EdgeWorkerState } from "../requests/types.gen";
-export type LogsServiceLogfilePathDefaultResponse = Awaited<ReturnType<typeof LogsService.logfilePath>>;
+import * as EdgeService from "../requests/services.gen";
+import { EdgeWorkerState, TaskInstanceState } from "../requests/types.gen";
+export type LogsServiceLogfilePathDefaultResponse = Awaited<ReturnType<typeof EdgeService.logfilePath>>;
 export type LogsServiceLogfilePathQueryResult<TData = LogsServiceLogfilePathDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useLogsServiceLogfilePathKey = "LogsServiceLogfilePath";
 export const UseLogsServiceLogfilePathKeyFn = ({ authorization, dagId, mapIndex, runId, taskId, tryNumber }: {
@@ -14,11 +14,11 @@ export const UseLogsServiceLogfilePathKeyFn = ({ authorization, dagId, mapIndex,
   taskId: string;
   tryNumber: number;
 }, queryKey?: Array<unknown>) => [useLogsServiceLogfilePathKey, ...(queryKey ?? [{ authorization, dagId, mapIndex, runId, taskId, tryNumber }])];
-export type MonitorServiceHealthDefaultResponse = Awaited<ReturnType<typeof MonitorService.health>>;
+export type MonitorServiceHealthDefaultResponse = Awaited<ReturnType<typeof EdgeService.health>>;
 export type MonitorServiceHealthQueryResult<TData = MonitorServiceHealthDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useMonitorServiceHealthKey = "MonitorServiceHealth";
 export const UseMonitorServiceHealthKeyFn = (queryKey?: Array<unknown>) => [useMonitorServiceHealthKey, ...(queryKey ?? [])];
-export type UiServiceWorkerDefaultResponse = Awaited<ReturnType<typeof UiService.worker>>;
+export type UiServiceWorkerDefaultResponse = Awaited<ReturnType<typeof EdgeService.worker>>;
 export type UiServiceWorkerQueryResult<TData = UiServiceWorkerDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useUiServiceWorkerKey = "UiServiceWorker";
 export const UseUiServiceWorkerKeyFn = ({ queueNamePattern, state, workerNamePattern }: {
@@ -26,10 +26,17 @@ export const UseUiServiceWorkerKeyFn = ({ queueNamePattern, state, workerNamePat
   state?: EdgeWorkerState[];
   workerNamePattern?: string;
 } = {}, queryKey?: Array<unknown>) => [useUiServiceWorkerKey, ...(queryKey ?? [{ queueNamePattern, state, workerNamePattern }])];
-export type UiServiceJobsDefaultResponse = Awaited<ReturnType<typeof UiService.jobs>>;
+export type UiServiceJobsDefaultResponse = Awaited<ReturnType<typeof EdgeService.jobs>>;
 export type UiServiceJobsQueryResult<TData = UiServiceJobsDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useUiServiceJobsKey = "UiServiceJobs";
-export const UseUiServiceJobsKeyFn = (queryKey?: Array<unknown>) => [useUiServiceJobsKey, ...(queryKey ?? [])];
+export const UseUiServiceJobsKeyFn = ({ dagIdPattern, runIdPattern, taskIdPattern, state, queuePattern, workerNamePattern }: {
+  dagIdPattern?: string;
+  runIdPattern?: string;
+  taskIdPattern?: string;
+  state?: TaskInstanceState[];
+  queuePattern?: string;
+  workerNamePattern?: string;
+} = {}, queryKey?: Array<unknown>) => [useUiServiceJobsKey, ...(queryKey ?? [{ dagIdPattern, runIdPattern, taskIdPattern, state, queuePattern, workerNamePattern }])];
 export type JobsServiceFetchMutationResult = Awaited<ReturnType<typeof JobsService.fetch>>;
 export type LogsServicePushLogsMutationResult = Awaited<ReturnType<typeof LogsService.pushLogs>>;
 export type WorkerServiceRegisterMutationResult = Awaited<ReturnType<typeof WorkerService.register>>;

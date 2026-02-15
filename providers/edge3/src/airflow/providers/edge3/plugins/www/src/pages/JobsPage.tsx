@@ -16,29 +16,151 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Box, Table, Text } from "@chakra-ui/react";
+import { Box, HStack, Table, Text, type SelectValueChangeDetails } from "@chakra-ui/react";
+import { useState, useCallback } from "react";
 import { useUiServiceJobs } from "openapi/queries";
 import { Link } from "react-router-dom";
 import TimeAgo from "react-timeago";
 
 import { ErrorAlert } from "src/components/ErrorAlert";
+import { SearchBar } from "src/components/SearchBar";
 import { StateBadge } from "src/components/StateBadge";
+import { Select } from "src/components/ui";
+import { jobStateOptions } from "src/constants";
 import { autoRefreshInterval } from "src/utils";
+import type { TaskInstanceState } from "openapi/requests/types.gen";
 
 export const JobsPage = () => {
-  const { data, error } = useUiServiceJobs(undefined, {
-    enabled: true,
-    refetchInterval: autoRefreshInterval,
-  });
+  const [dagIdPattern, setDagIdPattern] = useState("");
+  const [taskIdPattern, setTaskIdPattern] = useState("");
+  const [queuePattern, setQueuePattern] = useState("");
+  const [workerNamePattern, setWorkerNamePattern] = useState("");
+  const [filteredState, setFilteredState] = useState<string[]>([]);
+
+  const hasFilteredState = filteredState.length > 0;
+
+  const { data, error } = useUiServiceJobs(
+    {
+      dagIdPattern: dagIdPattern || undefined,
+      taskIdPattern: taskIdPattern || undefined,
+      queuePattern: queuePattern || undefined,
+      workerNamePattern: workerNamePattern || undefined,
+      state: hasFilteredState ? (filteredState as TaskInstanceState[]) : undefined,
+    },
+    undefined,
+    {
+      enabled: true,
+      refetchInterval: autoRefreshInterval,
+    },
+  );
+
+  const handleDagIdSearchChange = (value: string) => {
+    setDagIdPattern(value);
+  };
+
+  const handleTaskIdSearchChange = (value: string) => {
+    setTaskIdPattern(value);
+  };
+
+  const handleQueueSearchChange = (value: string) => {
+    setQueuePattern(value);
+  };
+
+  const handleWorkerSearchChange = (value: string) => {
+    setWorkerNamePattern(value);
+  };
+
+  const handleStateChange = useCallback(({ value }: SelectValueChangeDetails<string>) => {
+    const [val, ...rest] = value;
+
+    if ((val === undefined || val === "all") && rest.length === 0) {
+      setFilteredState([]);
+    } else {
+      setFilteredState(value.filter((state) => state !== "all"));
+    }
+  }, []);
 
   // TODO to make it proper
   // Use DataTable as component from Airflow-Core UI
   // Add sorting
-  // Add filtering
   // Translation?
   if (data?.jobs && data.jobs.length > 0)
     return (
       <Box p={2}>
+        <HStack gap={4} mb={4}>
+          <SearchBar
+            buttonProps={{ disabled: true }}
+            defaultValue={dagIdPattern}
+            hideAdvanced
+            hotkeyDisabled
+            onChange={handleDagIdSearchChange}
+            placeHolder="Search DAG ID"
+          />
+          <SearchBar
+            buttonProps={{ disabled: true }}
+            defaultValue={taskIdPattern}
+            hideAdvanced
+            hotkeyDisabled
+            onChange={handleTaskIdSearchChange}
+            placeHolder="Search Task ID"
+          />
+          <SearchBar
+            buttonProps={{ disabled: true }}
+            defaultValue={queuePattern}
+            hideAdvanced
+            hotkeyDisabled
+            onChange={handleQueueSearchChange}
+            placeHolder="Search Queue"
+          />
+          <SearchBar
+            buttonProps={{ disabled: true }}
+            defaultValue={workerNamePattern}
+            hideAdvanced
+            hotkeyDisabled
+            onChange={handleWorkerSearchChange}
+            placeHolder="Search Worker"
+          />
+          <Select.Root
+            collection={jobStateOptions}
+            maxW="450px"
+            multiple
+            onValueChange={handleStateChange}
+            value={hasFilteredState ? filteredState : ["all"]}
+          >
+            <Select.Trigger
+              {...(hasFilteredState ? { clearable: true } : {})}
+              colorPalette="brand"
+              isActive={Boolean(filteredState)}
+            >
+              <Select.ValueText>
+                {() =>
+                  hasFilteredState ? (
+                    <HStack flexWrap="wrap" fontSize="sm" gap="4px" paddingY="8px">
+                      {filteredState.map((state) => (
+                        <StateBadge key={state} state={state as TaskInstanceState}>
+                          {state}
+                        </StateBadge>
+                      ))}
+                    </HStack>
+                  ) : (
+                    "All States"
+                  )
+                }
+              </Select.ValueText>
+            </Select.Trigger>
+            <Select.Content>
+              {jobStateOptions.items.map((option) => (
+                <Select.Item item={option} key={option.label}>
+                  {option.value === "all" ? (
+                    option.label
+                  ) : (
+                    <StateBadge state={option.value as TaskInstanceState}>{option.label}</StateBadge>
+                  )}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+        </HStack>
         <Table.Root size="sm" interactive stickyHeader striped>
           <Table.Header>
             <Table.Row>
