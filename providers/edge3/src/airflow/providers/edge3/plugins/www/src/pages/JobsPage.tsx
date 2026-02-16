@@ -163,6 +163,9 @@ export const JobsPage = () => {
       {error ? (
         <ErrorAlert error={error} />
       ) : data?.jobs && data.jobs.length > 0 ? (
+  if (data?.jobs && data.jobs.length > 0)
+    return (
+      <Box p={2}>
         <Table.Root size="sm" interactive stickyHeader striped>
           <Table.Header>
             <Table.Row>
