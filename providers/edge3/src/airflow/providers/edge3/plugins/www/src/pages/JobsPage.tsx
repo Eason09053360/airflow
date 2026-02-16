@@ -84,83 +84,85 @@ export const JobsPage = () => {
   // Use DataTable as component from Airflow-Core UI
   // Add sorting
   // Translation?
-  if (data?.jobs && data.jobs.length > 0)
-    return (
-      <Box p={2}>
-        <HStack gap={4} mb={4}>
-          <SearchBar
-            buttonProps={{ disabled: true }}
-            defaultValue={dagIdPattern}
-            hideAdvanced
-            hotkeyDisabled
-            onChange={handleDagIdSearchChange}
-            placeHolder="Search DAG ID"
-          />
-          <SearchBar
-            buttonProps={{ disabled: true }}
-            defaultValue={taskIdPattern}
-            hideAdvanced
-            hotkeyDisabled
-            onChange={handleTaskIdSearchChange}
-            placeHolder="Search Task ID"
-          />
-          <SearchBar
-            buttonProps={{ disabled: true }}
-            defaultValue={queuePattern}
-            hideAdvanced
-            hotkeyDisabled
-            onChange={handleQueueSearchChange}
-            placeHolder="Search Queue"
-          />
-          <SearchBar
-            buttonProps={{ disabled: true }}
-            defaultValue={workerNamePattern}
-            hideAdvanced
-            hotkeyDisabled
-            onChange={handleWorkerSearchChange}
-            placeHolder="Search Worker"
-          />
-          <Select.Root
-            collection={jobStateOptions}
-            maxW="450px"
-            multiple
-            onValueChange={handleStateChange}
-            value={hasFilteredState ? filteredState : ["all"]}
+  return (
+    <Box p={2}>
+      <HStack gap={4} mb={4}>
+        <SearchBar
+          buttonProps={{ disabled: true }}
+          defaultValue={dagIdPattern}
+          hideAdvanced
+          hotkeyDisabled
+          onChange={handleDagIdSearchChange}
+          placeHolder="Search DAG ID"
+        />
+        <SearchBar
+          buttonProps={{ disabled: true }}
+          defaultValue={taskIdPattern}
+          hideAdvanced
+          hotkeyDisabled
+          onChange={handleTaskIdSearchChange}
+          placeHolder="Search Task ID"
+        />
+        <SearchBar
+          buttonProps={{ disabled: true }}
+          defaultValue={queuePattern}
+          hideAdvanced
+          hotkeyDisabled
+          onChange={handleQueueSearchChange}
+          placeHolder="Search Queue"
+        />
+        <SearchBar
+          buttonProps={{ disabled: true }}
+          defaultValue={workerNamePattern}
+          hideAdvanced
+          hotkeyDisabled
+          onChange={handleWorkerSearchChange}
+          placeHolder="Search Worker"
+        />
+        <Select.Root
+          collection={jobStateOptions}
+          maxW="450px"
+          multiple
+          onValueChange={handleStateChange}
+          value={hasFilteredState ? filteredState : ["all"]}
+        >
+          <Select.Trigger
+            {...(hasFilteredState ? { clearable: true } : {})}
+            colorPalette="brand"
+            isActive={Boolean(filteredState)}
           >
-            <Select.Trigger
-              {...(hasFilteredState ? { clearable: true } : {})}
-              colorPalette="brand"
-              isActive={Boolean(filteredState)}
-            >
-              <Select.ValueText>
-                {() =>
-                  hasFilteredState ? (
-                    <HStack flexWrap="wrap" fontSize="sm" gap="4px" paddingY="8px">
-                      {filteredState.map((state) => (
-                        <StateBadge key={state} state={state as TaskInstanceState}>
-                          {state}
-                        </StateBadge>
-                      ))}
-                    </HStack>
-                  ) : (
-                    "All States"
-                  )
-                }
-              </Select.ValueText>
-            </Select.Trigger>
-            <Select.Content>
-              {jobStateOptions.items.map((option) => (
-                <Select.Item item={option} key={option.label}>
-                  {option.value === "all" ? (
-                    option.label
-                  ) : (
-                    <StateBadge state={option.value as TaskInstanceState}>{option.label}</StateBadge>
-                  )}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        </HStack>
+            <Select.ValueText>
+              {() =>
+                hasFilteredState ? (
+                  <HStack flexWrap="wrap" fontSize="sm" gap="4px" paddingY="8px">
+                    {filteredState.map((state) => (
+                      <StateBadge key={state} state={state as TaskInstanceState}>
+                        {state}
+                      </StateBadge>
+                    ))}
+                  </HStack>
+                ) : (
+                  "All States"
+                )
+              }
+            </Select.ValueText>
+          </Select.Trigger>
+          <Select.Content>
+            {jobStateOptions.items.map((option) => (
+              <Select.Item item={option} key={option.label}>
+                {option.value === "all" ? (
+                  option.label
+                ) : (
+                  <StateBadge state={option.value as TaskInstanceState}>{option.label}</StateBadge>
+                )}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
+      </HStack>
+      {error ? (
+        <ErrorAlert error={error} />
+      ) : data?.jobs && data.jobs.length > 0 ? (
         <Table.Root size="sm" interactive stickyHeader striped>
           <Table.Header>
             <Table.Row>
@@ -221,26 +223,14 @@ export const JobsPage = () => {
             ))}
           </Table.Body>
         </Table.Root>
-      </Box>
-    );
-  if (data) {
-    return (
-      <Text as="div" pl={4} pt={1}>
-        Currently no jobs running. Start a Dag and then all active jobs should show up here. Note that after
-        some (configurable) time, jobs are purged from the list.
-      </Text>
-    );
-  }
-  if (error) {
-    return (
-      <Text as="div" pl={4} pt={1}>
-        <ErrorAlert error={error} />
-      </Text>
-    );
-  }
-  return (
-    <Text as="div" pl={4} pt={1}>
-      Loading...
-    </Text>
+      ) : data ? (
+        <Text>
+          Currently no jobs running. Start a Dag and then all active jobs should show up here. Note that
+          after some (configurable) time, jobs are purged from the list.
+        </Text>
+      ) : (
+        <Text>Loading...</Text>
+      )}
+    </Box>
   );
 };

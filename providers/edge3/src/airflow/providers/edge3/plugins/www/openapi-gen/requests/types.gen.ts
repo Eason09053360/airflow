@@ -5,7 +5,7 @@
  */
 export type BundleInfo = {
     name: string;
-    version?: string | null;
+    version?: (string | null);
 };
 
 /**
@@ -33,7 +33,7 @@ export type EdgeJobFetched = {
      */
     try_number: number;
     /**
-     * Command line to use to execute the job in Airflow 2. Task definition in Airflow 3
+     * Command line to use to execute the job in Airflow
      */
     command: ExecuteTask;
     /**
@@ -54,7 +54,7 @@ export type ExecuteTask = {
     token: string;
     dag_rel_path: string;
     bundle_info: BundleInfo;
-    log_path: string | null;
+    log_path: (string | null);
     ti: TaskInstance;
     sentry_integration?: string;
     type?: "ExecuteTask";
@@ -64,9 +64,9 @@ export type ExecuteTask = {
  * HTTPException Model used for error response.
  */
 export type HTTPExceptionResponse = {
-    detail: string | {
+    detail: (string | {
     [key: string]: unknown;
-};
+});
 };
 
 export type HTTPValidationError = {
@@ -108,15 +108,15 @@ export type Job = {
     /**
      * When the job was queued.
      */
-    queued_dttm?: string | null;
+    queued_dttm?: (string | null);
     /**
      * The worker processing the job during execution.
      */
-    edge_worker?: string | null;
+    edge_worker?: (string | null);
     /**
      * Last heartbeat of the job.
      */
-    last_update?: string | null;
+    last_update?: (string | null);
 };
 
 /**
@@ -165,12 +165,12 @@ export type TaskInstance = {
     pool_slots: number;
     queue: string;
     priority_weight: number;
-    parent_context_carrier?: {
+    parent_context_carrier?: ({
     [key: string]: unknown;
-} | null;
-    context_carrier?: {
+} | null);
+    context_carrier?: ({
     [key: string]: unknown;
-} | null;
+} | null);
 };
 
 /**
@@ -184,6 +184,10 @@ export type ValidationError = {
     loc: Array<(string | number)>;
     msg: string;
     type: string;
+    input?: unknown;
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -193,7 +197,7 @@ export type Worker = {
     /**
      * List of queues the worker is pulling jobs from. If not provided, worker pulls from all queues.
      */
-    queues?: Array<(string)> | null;
+    queues?: (Array<(string)> | null);
     /**
      * State of the worker from the view of the worker.
      */
@@ -211,7 +215,7 @@ export type Worker = {
     /**
      * Comments about the maintenance state of the worker.
      */
-    maintenance_comments?: string | null;
+    maintenance_comments?: (string | null);
     /**
      * Name of the worker.
      */
@@ -219,11 +223,11 @@ export type Worker = {
     /**
      * When the worker was first online.
      */
-    first_online?: string | null;
+    first_online?: (string | null);
     /**
      * When the worker last sent a heartbeat.
      */
-    last_heartbeat?: string | null;
+    last_heartbeat?: (string | null);
 };
 
 /**
@@ -241,11 +245,11 @@ export type WorkerQueueUpdateBody = {
     /**
      * Additional queues to be added to worker.
      */
-    new_queues: Array<(string)> | null;
+    new_queues: (Array<(string)> | null);
     /**
      * Queues to remove from worker.
      */
-    remove_queues: Array<(string)> | null;
+    remove_queues: (Array<(string)> | null);
 };
 
 /**
@@ -255,7 +259,7 @@ export type WorkerQueuesBody = {
     /**
      * List of queues the worker is pulling jobs from. If not provided, worker pulls from all queues.
      */
-    queues?: Array<(string)> | null;
+    queues?: (Array<(string)> | null);
     /**
      * Number of free concurrency slots on the worker.
      */
@@ -283,11 +287,11 @@ export type WorkerSetStateReturn = {
     /**
      * List of queues the worker is pulling jobs from. If not provided, worker pulls from all queues.
      */
-    queues: Array<(string)> | null;
+    queues: (Array<(string)> | null);
     /**
      * Comments about the maintenance state of the worker.
      */
-    maintenance_comments?: string | null;
+    maintenance_comments?: (string | null);
 };
 
 /**
@@ -297,7 +301,7 @@ export type WorkerStateBody = {
     /**
      * List of queues the worker is pulling jobs from. If not provided, worker pulls from all queues.
      */
-    queues?: Array<(string)> | null;
+    queues?: (Array<(string)> | null);
     /**
      * State of the worker from the view of the worker.
      */
@@ -315,520 +319,299 @@ export type WorkerStateBody = {
     /**
      * Comments about the maintenance state of the worker.
      */
-    maintenance_comments?: string | null;
+    maintenance_comments?: (string | null);
 };
 
 export type FetchData = {
-    /**
-     * JWT Authorization Token
-     */
-    authorization: string;
-    requestBody: WorkerQueuesBody;
-    workerName: string;
+    body: WorkerQueuesBody;
+    headers: {
+        /**
+         * JWT Authorization Token
+         */
+        authorization: string;
+    };
+    path: {
+        worker_name: string;
+    };
 };
 
-export type FetchResponse = EdgeJobFetched | null;
+export type FetchResponse = ((EdgeJobFetched | null));
+
+export type FetchError = (HTTPExceptionResponse | HTTPValidationError);
 
 export type StateData = {
-    /**
-     * JWT Authorization Token
-     */
-    authorization: string;
-    /**
-     * Identifier of the DAG to which the task belongs.
-     */
-    dagId: string;
-    /**
-     * For dynamically mapped tasks the mapping number, -1 if the task is not mapped.
-     */
-    mapIndex: number;
-    /**
-     * Run ID of the DAG execution.
-     */
-    runId: string;
-    /**
-     * State of the assigned task under execution.
-     */
-    state: TaskInstanceState;
-    /**
-     * Task name in the DAG.
-     */
-    taskId: string;
-    /**
-     * The number of attempt to execute this task.
-     */
-    tryNumber: number;
+    headers: {
+        /**
+         * JWT Authorization Token
+         */
+        authorization: string;
+    };
+    path: {
+        /**
+         * Identifier of the DAG to which the task belongs.
+         */
+        dag_id: string;
+        /**
+         * For dynamically mapped tasks the mapping number, -1 if the task is not mapped.
+         */
+        map_index: number;
+        /**
+         * Run ID of the DAG execution.
+         */
+        run_id: string;
+        /**
+         * State of the assigned task under execution.
+         */
+        state: TaskInstanceState;
+        /**
+         * Task name in the DAG.
+         */
+        task_id: string;
+        /**
+         * The number of attempt to execute this task.
+         */
+        try_number: number;
+    };
 };
 
-export type StateResponse = unknown;
+export type StateResponse = (unknown);
+
+export type StateError = (HTTPExceptionResponse | HTTPValidationError);
 
 export type LogfilePathData = {
-    /**
-     * JWT Authorization Token
-     */
-    authorization: string;
-    /**
-     * Identifier of the DAG to which the task belongs.
-     */
-    dagId: string;
-    /**
-     * For dynamically mapped tasks the mapping number, -1 if the task is not mapped.
-     */
-    mapIndex: number;
-    /**
-     * Run ID of the DAG execution.
-     */
-    runId: string;
-    /**
-     * Task name in the DAG.
-     */
-    taskId: string;
-    /**
-     * The number of attempt to execute this task.
-     */
-    tryNumber: number;
+    headers: {
+        /**
+         * JWT Authorization Token
+         */
+        authorization: string;
+    };
+    path: {
+        /**
+         * Identifier of the DAG to which the task belongs.
+         */
+        dag_id: string;
+        /**
+         * For dynamically mapped tasks the mapping number, -1 if the task is not mapped.
+         */
+        map_index: number;
+        /**
+         * Run ID of the DAG execution.
+         */
+        run_id: string;
+        /**
+         * Task name in the DAG.
+         */
+        task_id: string;
+        /**
+         * The number of attempt to execute this task.
+         */
+        try_number: number;
+    };
 };
 
-export type LogfilePathResponse = string;
+export type LogfilePathResponse = (string);
+
+export type LogfilePathError = (HTTPExceptionResponse | HTTPValidationError);
 
 export type PushLogsData = {
-    /**
-     * JWT Authorization Token
-     */
-    authorization: string;
-    /**
-     * Identifier of the DAG to which the task belongs.
-     */
-    dagId: string;
-    /**
-     * For dynamically mapped tasks the mapping number, -1 if the task is not mapped.
-     */
-    mapIndex: number;
-    requestBody: PushLogsBody;
-    /**
-     * Run ID of the DAG execution.
-     */
-    runId: string;
-    /**
-     * Task name in the DAG.
-     */
-    taskId: string;
-    /**
-     * The number of attempt to execute this task.
-     */
-    tryNumber: number;
+    body: PushLogsBody;
+    headers: {
+        /**
+         * JWT Authorization Token
+         */
+        authorization: string;
+    };
+    path: {
+        /**
+         * Identifier of the DAG to which the task belongs.
+         */
+        dag_id: string;
+        /**
+         * For dynamically mapped tasks the mapping number, -1 if the task is not mapped.
+         */
+        map_index: number;
+        /**
+         * Run ID of the DAG execution.
+         */
+        run_id: string;
+        /**
+         * Task name in the DAG.
+         */
+        task_id: string;
+        /**
+         * The number of attempt to execute this task.
+         */
+        try_number: number;
+    };
 };
 
-export type PushLogsResponse = unknown;
+export type PushLogsResponse = (unknown);
+
+export type PushLogsError = (HTTPExceptionResponse | HTTPValidationError);
 
 export type RegisterData = {
-    /**
-     * JWT Authorization Token
-     */
-    authorization: string;
-    requestBody: WorkerStateBody;
-    /**
-     * Hostname or instance name of the worker
-     */
-    workerName: string;
+    body: WorkerStateBody;
+    headers: {
+        /**
+         * JWT Authorization Token
+         */
+        authorization: string;
+    };
+    path: {
+        /**
+         * Hostname or instance name of the worker
+         */
+        worker_name: string;
+    };
 };
 
-export type RegisterResponse = WorkerRegistrationReturn;
+export type RegisterResponse = (WorkerRegistrationReturn);
+
+export type RegisterError = (HTTPExceptionResponse | HTTPValidationError);
 
 export type SetStateData = {
-    /**
-     * JWT Authorization Token
-     */
-    authorization: string;
-    requestBody: WorkerStateBody;
-    /**
-     * Hostname or instance name of the worker
-     */
-    workerName: string;
+    body: WorkerStateBody;
+    headers: {
+        /**
+         * JWT Authorization Token
+         */
+        authorization: string;
+    };
+    path: {
+        /**
+         * Hostname or instance name of the worker
+         */
+        worker_name: string;
+    };
 };
 
-export type SetStateResponse = WorkerSetStateReturn;
+export type SetStateResponse = (WorkerSetStateReturn);
+
+export type SetStateError = (HTTPExceptionResponse | HTTPValidationError);
 
 export type UpdateQueuesData = {
-    /**
-     * JWT Authorization Token
-     */
-    authorization: string;
-    requestBody: WorkerQueueUpdateBody;
-    /**
-     * Hostname or instance name of the worker
-     */
-    workerName: string;
+    body: WorkerQueueUpdateBody;
+    headers: {
+        /**
+         * JWT Authorization Token
+         */
+        authorization: string;
+    };
+    path: {
+        /**
+         * Hostname or instance name of the worker
+         */
+        worker_name: string;
+    };
 };
 
-export type UpdateQueuesResponse = unknown;
+export type UpdateQueuesResponse = (unknown);
 
-export type HealthResponse = {
+export type UpdateQueuesError = (HTTPExceptionResponse | HTTPValidationError);
+
+export type HealthResponse = ({
     [key: string]: (string);
-};
+});
+
+export type HealthError = unknown;
 
 export type WorkerData = {
-    queueNamePattern?: string | null;
-    state?: Array<EdgeWorkerState> | null;
-    workerNamePattern?: string | null;
+    query?: {
+        queue_name_pattern?: (string | null);
+        state?: (Array<EdgeWorkerState> | null);
+        worker_name_pattern?: (string | null);
+    };
 };
 
-export type WorkerResponse = WorkerCollectionResponse;
+export type WorkerResponse = (WorkerCollectionResponse);
 
-export type JobsResponse = JobCollectionResponse;
+export type WorkerError = (HTTPValidationError);
+
+export type JobsData = {
+    query?: {
+        dag_id_pattern?: (string | null);
+        queue_pattern?: (string | null);
+        run_id_pattern?: (string | null);
+        state?: (Array<TaskInstanceState> | null);
+        task_id_pattern?: (string | null);
+        worker_name_pattern?: (string | null);
+    };
+};
+
+export type JobsResponse = (JobCollectionResponse);
+
+export type JobsError = (HTTPValidationError);
 
 export type RequestWorkerMaintenanceData = {
-    requestBody: MaintenanceRequest;
-    workerName: string;
+    body: MaintenanceRequest;
+    path: {
+        worker_name: string;
+    };
 };
 
-export type RequestWorkerMaintenanceResponse = unknown;
+export type RequestWorkerMaintenanceResponse = (unknown);
+
+export type RequestWorkerMaintenanceError = (HTTPValidationError);
 
 export type UpdateWorkerMaintenanceData = {
-    requestBody: MaintenanceRequest;
-    workerName: string;
+    body: MaintenanceRequest;
+    path: {
+        worker_name: string;
+    };
 };
 
-export type UpdateWorkerMaintenanceResponse = unknown;
+export type UpdateWorkerMaintenanceResponse = (unknown);
+
+export type UpdateWorkerMaintenanceError = (HTTPValidationError);
 
 export type ExitWorkerMaintenanceData = {
-    workerName: string;
+    path: {
+        worker_name: string;
+    };
 };
 
-export type ExitWorkerMaintenanceResponse = unknown;
+export type ExitWorkerMaintenanceResponse = (unknown);
+
+export type ExitWorkerMaintenanceError = (HTTPValidationError);
 
 export type RequestWorkerShutdownData = {
-    workerName: string;
+    path: {
+        worker_name: string;
+    };
 };
 
-export type RequestWorkerShutdownResponse = unknown;
+export type RequestWorkerShutdownResponse = (unknown);
+
+export type RequestWorkerShutdownError = (HTTPValidationError);
 
 export type DeleteWorkerData = {
-    workerName: string;
+    path: {
+        worker_name: string;
+    };
 };
 
-export type DeleteWorkerResponse = unknown;
+export type DeleteWorkerResponse = (unknown);
+
+export type DeleteWorkerError = (HTTPValidationError);
 
 export type AddWorkerQueueData = {
-    queueName: string;
-    workerName: string;
+    path: {
+        queue_name: string;
+        worker_name: string;
+    };
 };
 
-export type AddWorkerQueueResponse = unknown;
+export type AddWorkerQueueResponse = (unknown);
+
+export type AddWorkerQueueError = (HTTPValidationError);
 
 export type RemoveWorkerQueueData = {
-    queueName: string;
-    workerName: string;
-};
-
-export type RemoveWorkerQueueResponse = unknown;
-
-export type $OpenApiTs = {
-    '/edge_worker/v1/jobs/fetch/{worker_name}': {
-        post: {
-            req: FetchData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: EdgeJobFetched | null;
-                /**
-                 * Bad Request
-                 */
-                400: HTTPExceptionResponse;
-                /**
-                 * Forbidden
-                 */
-                403: HTTPExceptionResponse;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/v1/jobs/state/{dag_id}/{task_id}/{run_id}/{try_number}/{map_index}/{state}': {
-        patch: {
-            req: StateData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Bad Request
-                 */
-                400: HTTPExceptionResponse;
-                /**
-                 * Forbidden
-                 */
-                403: HTTPExceptionResponse;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/v1/logs/logfile_path/{dag_id}/{task_id}/{run_id}/{try_number}/{map_index}': {
-        get: {
-            req: LogfilePathData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: string;
-                /**
-                 * Bad Request
-                 */
-                400: HTTPExceptionResponse;
-                /**
-                 * Forbidden
-                 */
-                403: HTTPExceptionResponse;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/v1/logs/push/{dag_id}/{task_id}/{run_id}/{try_number}/{map_index}': {
-        post: {
-            req: PushLogsData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Bad Request
-                 */
-                400: HTTPExceptionResponse;
-                /**
-                 * Forbidden
-                 */
-                403: HTTPExceptionResponse;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/v1/worker/{worker_name}': {
-        post: {
-            req: RegisterData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: WorkerRegistrationReturn;
-                /**
-                 * Bad Request
-                 */
-                400: HTTPExceptionResponse;
-                /**
-                 * Forbidden
-                 */
-                403: HTTPExceptionResponse;
-                /**
-                 * Conflict
-                 */
-                409: HTTPExceptionResponse;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-        patch: {
-            req: SetStateData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: WorkerSetStateReturn;
-                /**
-                 * Bad Request
-                 */
-                400: HTTPExceptionResponse;
-                /**
-                 * Forbidden
-                 */
-                403: HTTPExceptionResponse;
-                /**
-                 * Conflict
-                 */
-                409: HTTPExceptionResponse;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/v1/worker/queues/{worker_name}': {
-        patch: {
-            req: UpdateQueuesData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Bad Request
-                 */
-                400: HTTPExceptionResponse;
-                /**
-                 * Forbidden
-                 */
-                403: HTTPExceptionResponse;
-                /**
-                 * Conflict
-                 */
-                409: HTTPExceptionResponse;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/v1/health': {
-        get: {
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: {
-                    [key: string]: (string);
-                };
-            };
-        };
-    };
-    '/edge_worker/ui/worker': {
-        get: {
-            req: WorkerData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: WorkerCollectionResponse;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/ui/jobs': {
-        get: {
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: JobCollectionResponse;
-            };
-        };
-    };
-    '/edge_worker/ui/worker/{worker_name}/maintenance': {
-        post: {
-            req: RequestWorkerMaintenanceData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-        patch: {
-            req: UpdateWorkerMaintenanceData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-        delete: {
-            req: ExitWorkerMaintenanceData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/ui/worker/{worker_name}/shutdown': {
-        post: {
-            req: RequestWorkerShutdownData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/ui/worker/{worker_name}': {
-        delete: {
-            req: DeleteWorkerData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-    };
-    '/edge_worker/ui/worker/{worker_name}/queues/{queue_name}': {
-        put: {
-            req: AddWorkerQueueData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
-        delete: {
-            req: RemoveWorkerQueueData;
-            res: {
-                /**
-                 * Successful Response
-                 */
-                200: unknown;
-                /**
-                 * Validation Error
-                 */
-                422: HTTPValidationError;
-            };
-        };
+    path: {
+        queue_name: string;
+        worker_name: string;
     };
 };
+
+export type RemoveWorkerQueueResponse = (unknown);
+
+export type RemoveWorkerQueueError = (HTTPValidationError);
