@@ -32,6 +32,7 @@ import type { TaskInstanceState } from "openapi/requests/types.gen";
 
 export const JobsPage = () => {
   const [dagIdPattern, setDagIdPattern] = useState("");
+  const [runIdPattern, setRunIdPattern] = useState("");
   const [taskIdPattern, setTaskIdPattern] = useState("");
   const [queuePattern, setQueuePattern] = useState("");
   const [workerNamePattern, setWorkerNamePattern] = useState("");
@@ -42,6 +43,7 @@ export const JobsPage = () => {
   const { data, error } = useUiServiceJobs(
     {
       dagIdPattern: dagIdPattern || undefined,
+      runIdPattern: runIdPattern || undefined,
       taskIdPattern: taskIdPattern || undefined,
       queuePattern: queuePattern || undefined,
       workerNamePattern: workerNamePattern || undefined,
@@ -56,6 +58,10 @@ export const JobsPage = () => {
 
   const handleDagIdSearchChange = (value: string) => {
     setDagIdPattern(value);
+  };
+
+  const handleRunIdSearchChange = (value: string) => {
+    setRunIdPattern(value);
   };
 
   const handleTaskIdSearchChange = (value: string) => {
@@ -94,6 +100,14 @@ export const JobsPage = () => {
           hotkeyDisabled
           onChange={handleDagIdSearchChange}
           placeHolder="Search DAG ID"
+        />
+        <SearchBar
+          buttonProps={{ disabled: true }}
+          defaultValue={runIdPattern}
+          hideAdvanced
+          hotkeyDisabled
+          onChange={handleRunIdSearchChange}
+          placeHolder="Search Run ID"
         />
         <SearchBar
           buttonProps={{ disabled: true }}
