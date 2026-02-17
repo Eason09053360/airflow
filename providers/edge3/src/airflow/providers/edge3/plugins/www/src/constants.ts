@@ -19,7 +19,7 @@
 
 import { createListCollection } from "@chakra-ui/react";
 import type { EdgeWorkerState, TaskInstanceState } from "../openapi-gen/requests/types.gen";
-import { EdgeWorkerStateSchema, TaskInstanceStateSchema } from "../openapi-gen/requests/schemas.gen";
+import { $EdgeWorkerState, $TaskInstanceState } from "../openapi-gen/requests/schemas.gen";
 
 // Helper function to convert snake_case or space-separated strings to Title Case
 const toTitleCase = (str: string): string => {
@@ -35,7 +35,7 @@ export const workerStateOptions = createListCollection<{
 }>({
   items: [
     { label: "All States", value: "all" },
-    ...EdgeWorkerStateSchema.enum.map((state) => ({
+    ...$EdgeWorkerState.enum.map((state) => ({
       label: toTitleCase(state),
       value: state as EdgeWorkerState,
     })),
@@ -48,7 +48,7 @@ export const jobStateOptions = createListCollection<{
 }>({
   items: [
     { label: "All States", value: "all" },
-    ...TaskInstanceStateSchema.enum.map((state) => ({
+    ...$TaskInstanceState.enum.map((state) => ({
       label: toTitleCase(state),
       value: state as TaskInstanceState,
     })),
