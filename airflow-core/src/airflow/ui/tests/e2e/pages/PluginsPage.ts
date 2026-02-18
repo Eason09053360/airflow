@@ -20,19 +20,10 @@ import type { Locator, Page } from "@playwright/test";
 
 import { BasePage } from "./BasePage";
 
-/**
- * Plugins Page Object
- */
 export class PluginsPage extends BasePage {
-  public readonly emptyState: Locator;
   public readonly heading: Locator;
-  public readonly paginationNextButton: Locator;
-  public readonly paginationPrevButton: Locator;
   public readonly rows: Locator;
   public readonly table: Locator;
-
-  private currentLimit?: number;
-  private currentOffset?: number;
 
   public constructor(page: Page) {
     super(page);
@@ -44,39 +35,12 @@ export class PluginsPage extends BasePage {
     this.rows = this.table.locator("tbody tr").filter({
       has: page.locator("td"),
     });
-    this.paginationNextButton = page.locator('[data-testid="next"]');
-    this.paginationPrevButton = page.locator('[data-testid="prev"]');
-    this.emptyState = page.getByText(/no items/i);
   }
 
-  /**
-   * Click the next page button
-   */
-  public async clickNextPage(): Promise<void> {
-    await this.paginationNextButton.click();
-    await this.waitForLoad();
-    await this.ensureUrlParams();
-  }
-
-  /**
-   * Click the previous page button
-   */
-  public async clickPrevPage(): Promise<void> {
-    await this.paginationPrevButton.click();
-    await this.waitForLoad();
-    await this.ensureUrlParams();
-  }
-
-  /**
-   * Get the count of plugin rows
-   */
   public async getPluginCount(): Promise<number> {
     return this.rows.count();
   }
 
-  /**
-   * Get all plugin names from the current page
-   */
   public async getPluginNames(): Promise<Array<string>> {
     const count = await this.rows.count();
 
@@ -87,9 +51,6 @@ export class PluginsPage extends BasePage {
     return this.rows.locator("td:first-child").allTextContents();
   }
 
-  /**
-   * Get all plugin sources from the current page
-   */
   public async getPluginSources(): Promise<Array<string>> {
     const count = await this.rows.count();
 
@@ -100,54 +61,16 @@ export class PluginsPage extends BasePage {
     return this.rows.locator("td:nth-child(2)").allTextContents();
   }
 
-  /**
-   * Check if the next page button is available and enabled
-   */
-  public async hasNextPage(): Promise<boolean> {
-    const count = await this.paginationNextButton.count();
-
-    if (count === 0) {
-      return false;
-    }
-
-    return await this.paginationNextButton.isEnabled();
-  }
-
-  /**
-   * Navigate to Plugins page
-   */
   public async navigate(): Promise<void> {
     await this.navigateTo("/plugins");
   }
 
-  /**
-   * Navigate to Plugins page with specific pagination parameters
-   */
-  public async navigateWithParams(limit: number, offset: number): Promise<void> {
-    this.currentLimit = limit;
-    this.currentOffset = offset;
-
-    await this.page.goto(`/plugins?limit=${limit}&offset=${offset}`, {
-      timeout: 30_000,
-      waitUntil: "domcontentloaded",
-    });
-    await this.waitForLoad();
-    await this.ensureUrlParams();
-  }
-
-  /**
-   * Wait for the plugins page to fully load
-   */
   public async waitForLoad(): Promise<void> {
     await this.table.waitFor({ state: "visible", timeout: 30_000 });
     await this.waitForTableData();
   }
 
-  /**
-   * Wait for table data to be loaded (not skeleton loaders)
-   */
   public async waitForTableData(): Promise<void> {
-    // Wait for actual data cells to appear (not skeleton loaders)
     await this.page.waitForFunction(
       () => {
         const table = document.querySelector('[data-testid="table-list"]');
@@ -156,7 +79,6 @@ export class PluginsPage extends BasePage {
           return false;
         }
 
-        // Check for actual content in tbody (real data, not skeleton)
         const cells = table.querySelectorAll("tbody tr td");
 
         return cells.length > 0;
@@ -164,37 +86,5 @@ export class PluginsPage extends BasePage {
       undefined,
       { timeout: 30_000 },
     );
-  }
-
-  /**
-   * Ensure offset and limit params are present in URL to prevent them from being ignored
-   * This is similar to EventsPage.ensureUrlParams()
-   */
-  private async ensureUrlParams(): Promise<void> {
-    if (this.currentLimit === undefined || this.currentOffset === undefined) {
-      return;
-    }
-
-    const currentUrl = this.page.url();
-    const url = new URL(currentUrl);
-    const hasLimit = url.searchParams.has("limit");
-    const hasOffset = url.searchParams.has("offset");
-
-    if (hasLimit && !hasOffset) {
-      url.searchParams.set("offset", String(this.currentOffset));
-      await this.page.goto(url.toString(), {
-        timeout: 30_000,
-        waitUntil: "domcontentloaded",
-      });
-      await this.waitForLoad();
-    } else if (!hasLimit && !hasOffset) {
-      url.searchParams.set("offset", String(this.currentOffset));
-      url.searchParams.set("limit", String(this.currentLimit));
-      await this.page.goto(url.toString(), {
-        timeout: 30_000,
-        waitUntil: "domcontentloaded",
-      });
-      await this.waitForLoad();
-    }
   }
 }

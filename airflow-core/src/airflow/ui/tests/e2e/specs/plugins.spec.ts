@@ -70,35 +70,3 @@ test.describe("Plugins Page", () => {
     expect(pluginNames.length).toBe(pluginSources.length);
   });
 });
-
-test.describe.skip("Plugins Pagination", () => {
-  let pluginsPage: PluginsPage;
-
-  test.beforeEach(({ page }) => {
-    pluginsPage = new PluginsPage(page);
-  });
-
-  test("should navigate through pages using next and prev buttons", async () => {
-    await pluginsPage.navigate();
-
-    await expect(pluginsPage.paginationNextButton).toBeVisible();
-    await expect(pluginsPage.paginationPrevButton).toBeVisible();
-
-    const initialPluginNames = await pluginsPage.getPluginNames();
-
-    expect(initialPluginNames.length).toBeGreaterThan(0);
-
-    await pluginsPage.clickNextPage();
-
-    const pluginNamesAfterNext = await pluginsPage.getPluginNames();
-
-    expect(pluginNamesAfterNext.length).toBeGreaterThan(0);
-    expect(pluginNamesAfterNext).not.toEqual(initialPluginNames);
-
-    await pluginsPage.clickPrevPage();
-
-    const pluginNamesAfterPrev = await pluginsPage.getPluginNames();
-
-    expect(pluginNamesAfterPrev).toEqual(initialPluginNames);
-  });
-});
