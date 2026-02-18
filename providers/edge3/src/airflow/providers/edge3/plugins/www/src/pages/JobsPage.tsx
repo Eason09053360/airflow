@@ -17,9 +17,9 @@
  * under the License.
  */
 import { Box, HStack, Table, Text, type SelectValueChangeDetails } from "@chakra-ui/react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useUiServiceJobs } from "openapi/queries";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import TimeAgo from "react-timeago";
 
 import { ErrorAlert } from "src/components/ErrorAlert";
@@ -31,14 +31,25 @@ import { autoRefreshInterval } from "src/utils";
 import type { TaskInstanceState } from "openapi/requests/types.gen";
 
 export const JobsPage = () => {
-  const [dagIdPattern, setDagIdPattern] = useState("");
-  const [runIdPattern, setRunIdPattern] = useState("");
-  const [taskIdPattern, setTaskIdPattern] = useState("");
-  const [queuePattern, setQueuePattern] = useState("");
-  const [workerNamePattern, setWorkerNamePattern] = useState("");
+  const [searchParams] = useSearchParams();
+  const [dagIdPattern, setDagIdPattern] = useState(searchParams.get("dagId") || "");
+  const [runIdPattern, setRunIdPattern] = useState(searchParams.get("runId") || "");
+  const [taskIdPattern, setTaskIdPattern] = useState(searchParams.get("taskId") || "");
+  const [queuePattern, setQueuePattern] = useState(searchParams.get("queue") || "");
+  const [workerNamePattern, setWorkerNamePattern] = useState(searchParams.get("worker") || "");
   const [filteredState, setFilteredState] = useState<string[]>([]);
 
+  useEffect(() => {
+    const queueFromUrl = searchParams.get("queue");
+    const workerFromUrl = searchParams.get("worker");
+    setQueuePattern(queueFromUrl || "");
+    setWorkerNamePattern(workerFromUrl || "");
+  }, [searchParams]);
+
   const hasFilteredState = filteredState.length > 0;
+  const hasFilters =
+    hasFilteredState ||
+    Boolean(dagIdPattern || runIdPattern || taskIdPattern || queuePattern || workerNamePattern);
 
   const { data, error } = useUiServiceJobs(
     {
@@ -86,10 +97,6 @@ export const JobsPage = () => {
     }
   }, []);
 
-  // TODO to make it proper
-  // Use DataTable as component from Airflow-Core UI
-  // Add sorting
-  // Translation?
   return (
     <Box p={2}>
       <HStack gap={4} mb={4}>
@@ -98,6 +105,7 @@ export const JobsPage = () => {
           defaultValue={dagIdPattern}
           hideAdvanced
           hotkeyDisabled
+          key={`dag-${dagIdPattern}`}
           onChange={handleDagIdSearchChange}
           placeHolder="Search DAG ID"
         />
@@ -106,6 +114,7 @@ export const JobsPage = () => {
           defaultValue={runIdPattern}
           hideAdvanced
           hotkeyDisabled
+          key={`run-${runIdPattern}`}
           onChange={handleRunIdSearchChange}
           placeHolder="Search Run ID"
         />
@@ -114,6 +123,7 @@ export const JobsPage = () => {
           defaultValue={taskIdPattern}
           hideAdvanced
           hotkeyDisabled
+          key={`task-${taskIdPattern}`}
           onChange={handleTaskIdSearchChange}
           placeHolder="Search Task ID"
         />
@@ -122,6 +132,7 @@ export const JobsPage = () => {
           defaultValue={queuePattern}
           hideAdvanced
           hotkeyDisabled
+          key={`queue-${queuePattern}`}
           onChange={handleQueueSearchChange}
           placeHolder="Search Queue"
         />
@@ -130,6 +141,7 @@ export const JobsPage = () => {
           defaultValue={workerNamePattern}
           hideAdvanced
           hotkeyDisabled
+          key={`worker-${workerNamePattern}`}
           onChange={handleWorkerSearchChange}
           placeHolder="Search Worker"
         />
@@ -239,8 +251,9 @@ export const JobsPage = () => {
         </Table.Root>
       ) : data ? (
         <Text>
-          Currently no jobs running. Start a Dag and then all active jobs should show up here. Note that
-          after some (configurable) time, jobs are purged from the list.
+          {hasFilters
+            ? "No jobs match the current filters. Try adjusting or clearing filters."
+            : "Currently no jobs running. Start a Dag and then all active jobs should show up here. Note that after some (configurable) time, jobs are purged from the list."}
         </Text>
       ) : (
         <Text>Loading...</Text>
