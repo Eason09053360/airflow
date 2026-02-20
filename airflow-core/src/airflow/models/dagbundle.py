@@ -48,7 +48,7 @@ class DagBundleModel(Base, LoggingMixin):
     active: Mapped[bool | None] = mapped_column(Boolean, default=True, nullable=True)
     version: Mapped[str | None] = mapped_column(String(200), nullable=True)
     last_refreshed: Mapped[datetime | None] = mapped_column(UtcDateTime, nullable=True)
-    signed_url_template: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    signed_url_template: Mapped[str | None] = mapped_column(sa.Text(), nullable=True)
     template_params: Mapped[dict | None] = mapped_column(sa.JSON(), nullable=True)
     teams = relationship("Team", secondary=dag_bundle_team_association_table, back_populates="dag_bundles")
 
