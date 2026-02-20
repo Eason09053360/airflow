@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import json
 import os
+import random
+import string
 from contextlib import nullcontext
 from unittest.mock import patch
 
@@ -261,6 +263,46 @@ def test_sync_bundles_to_db_with_template(clear_db, session):
     assert bundle_model.render_url(version="v1.0") == "https://github.com/example/repo/tree/v1.0/dags"
     assert bundle_model.template_params == {"subdir": "dags"}
     assert bundle_model.active is True
+
+
+@pytest.mark.db_test
+@conf_vars({("core", "LOAD_EXAMPLES"): "False", ("core", "fernet_key"): "test-serial-key"})
+def test_sync_bundles_to_db_with_long_signed_url_template(clear_db, session):
+    """Ensure long signed URL templates are stored even when raw template is < 200 chars."""
+    base_url = "https://example.com/"
+    target_len = 180
+    padding_len = target_len - len(base_url)
+    assert padding_len > 0
+    rng = random.Random(0)
+    tail = "".join(rng.choice(string.ascii_letters + string.digits) for _ in range(padding_len))
+    long_template = base_url + tail
+    assert len(long_template) == target_len
+    assert len(long_template) < 200
+
+    config = [
+        {
+            "name": "long-template-bundle",
+            "classpath": "unit.dag_processing.bundles.test_dag_bundle_manager.BundleWithTemplate",
+            "kwargs": {
+                "view_url_template": long_template,
+                "refresh_interval": 1,
+            },
+        }
+    ]
+
+    with patch.dict(
+        os.environ, {"AIRFLOW__DAG_PROCESSOR__DAG_BUNDLE_CONFIG_LIST": json.dumps(config)}
+    ):
+        manager = DagBundlesManager()
+        manager.sync_bundles_to_db()
+
+    bundle_model = session.scalars(
+        select(DagBundleModel).filter_by(name="long-template-bundle").limit(1)
+    ).first()
+
+    assert bundle_model is not None
+    assert bundle_model._unsign_url() == long_template
+    assert len(bundle_model.signed_url_template) > 200
 
 
 @pytest.mark.db_test
