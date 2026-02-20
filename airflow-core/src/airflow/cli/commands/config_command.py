@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import shutil
 import sys
+from contextlib import suppress
 from dataclasses import dataclass
 from io import StringIO
 from typing import Any, NamedTuple
@@ -71,11 +72,8 @@ def get_value(args):
     # providers are initialized. Theoretically Providers might add new sections and options
     # but also override defaults for existing options, so without loading all providers we
     # cannot be sure what is the final value of the option.
-    try:
-        value = conf.get(args.section, args.option)
-        print(value)
-    except AirflowConfigException:
-        pass
+    with suppress(AirflowConfigException):
+        print(conf.get(args.section, args.option))
 
 
 class ConfigParameter(NamedTuple):
