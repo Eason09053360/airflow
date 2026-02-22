@@ -31,7 +31,7 @@ __version__ = "3.2.0"
 import os
 import sys
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 from airflow.utils.deprecation_tools import DeprecatedImportWarning
 
@@ -98,7 +98,10 @@ if TYPE_CHECKING:
     # These objects are imported by PEP-562, however, static analyzers and IDE's
     # have no idea about typing of these objects.
     # Add it under TYPE_CHECKING block should help with it.
-    from airflow.sdk import DAG, Asset, Asset as Dataset, XComArg
+    DAG: TypeAlias = Any
+    Asset: TypeAlias = Any
+    Dataset: TypeAlias = Any
+    XComArg: TypeAlias = Any
 
 
 def __getattr__(name: str):

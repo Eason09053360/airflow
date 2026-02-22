@@ -53,7 +53,7 @@ __all__ = [
     "clear_task_instances",
 ]
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 
 def import_all_models():
@@ -148,10 +148,13 @@ if TYPE_CHECKING:
     from airflow.models.taskreschedule import TaskReschedule
     from airflow.models.trigger import Trigger
     from airflow.models.variable import Variable
-    from airflow.sdk import DAG, BaseOperator, BaseOperatorLink, Param
-    from airflow.sdk.bases.xcom import BaseXCom
-    from airflow.sdk.definitions.mappedoperator import MappedOperator
-    from airflow.sdk.execution_time.xcom import XCom
+    DAG: TypeAlias = Any
+    BaseOperator: TypeAlias = Any
+    BaseOperatorLink: TypeAlias = Any
+    Param: TypeAlias = Any
+    BaseXCom: TypeAlias = Any
+    MappedOperator: TypeAlias = Any
+    XCom: TypeAlias = Any
 
 
 __deprecated_classes = {
